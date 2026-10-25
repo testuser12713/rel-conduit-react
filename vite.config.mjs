@@ -1,5 +1,8 @@
+import { fileURLToPath } from 'node:url';
 import { transformWithOxc } from 'vite';
 
+const rootDir = fileURLToPath(new URL('.', import.meta.url));
+const entryFile = fileURLToPath(new URL('index.html', import.meta.url));
 const apiRoot = process.env.REACT_APP_API_ROOT;
 
 const jsxInJs = () => ({
@@ -18,6 +21,13 @@ const jsxInJs = () => ({
 });
 
 export default {
+  root: rootDir,
+  envPrefix: ['VITE_', 'REACT_APP_'],
+  build: {
+    rollupOptions: {
+      input: entryFile
+    }
+  },
   plugins: [jsxInJs()],
   define: {
     global: 'globalThis',

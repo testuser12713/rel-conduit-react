@@ -43,7 +43,7 @@ let resolvedDefault = null;
 export function resolveApiRoot(env) {
   if (env === undefined) {
     if (resolvedDefault === null) {
-      resolvedDefault = validate(process.env.REACT_APP_API_ROOT);
+      resolvedDefault = validate(import.meta.env.REACT_APP_API_ROOT);
     }
     return resolvedDefault;
   }
