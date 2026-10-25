@@ -20,6 +20,7 @@ const jsxInJs = () => ({
 export default {
   plugins: [jsxInJs()],
   define: {
+    global: 'globalThis',
     'process.env.REACT_APP_API_ROOT': JSON.stringify(apiRoot === undefined ? '' : apiRoot)
   },
   server: {
