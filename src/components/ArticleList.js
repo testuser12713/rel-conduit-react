@@ -1,8 +1,22 @@
 import ArticlePreview from './ArticlePreview';
+import ListErrors from './ListErrors';
 import ListPagination from './ListPagination';
 import React from 'react';
 
 const ArticleList = props => {
+  if (props.errors) {
+    return (
+      <div>
+        <ListErrors errors={props.errors} />
+        {props.onRetry && (
+          <button className="btn btn-outline-primary" onClick={props.onRetry}>
+            Try again
+          </button>
+        )}
+      </div>
+    );
+  }
+
   if (!props.articles) {
     return (
       <div className="article-preview">Loading...</div>
