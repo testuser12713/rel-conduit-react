@@ -26,6 +26,10 @@ export default {
   server: {
     port: 4100
   },
+  build: {
+    outDir: 'build',
+    emptyOutDir: true
+  },
   test: {
     environment: 'jsdom',
     globals: true,

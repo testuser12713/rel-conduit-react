@@ -47,3 +47,34 @@ describe('resolveApiRoot', () => {
     expect(() => resolveApiRoot(withRoot('https://example.test/api#token'))).toThrow(/REACT_APP_API_ROOT/);
   });
 });
+
+describe('resolveApiRoot at start time', () => {
+  afterEach(() => {
+    delete globalThis.__APP_CONFIG__;
+  });
+
+  it('prefers the runtime value over the baked one', () => {
+    globalThis.__APP_CONFIG__ = { apiRoot: 'https://runtime.example.test/api' };
+
+    expect(resolveApiRoot()).toBe('https://runtime.example.test/api');
+  });
+
+  it('prefers the runtime value over an explicitly passed baked value', () => {
+    globalThis.__APP_CONFIG__ = { apiRoot: 'https://runtime.example.test/api' };
+
+    expect(resolveApiRoot(withRoot('https://baked.example.test/api')))
+      .toBe('https://runtime.example.test/api');
+  });
+
+  it('rejects an invalid runtime value and names the variable', () => {
+    globalThis.__APP_CONFIG__ = { apiRoot: '/api' };
+
+    expect(() => resolveApiRoot()).toThrow(/REACT_APP_API_ROOT/);
+  });
+
+  it('rejects an empty runtime value instead of falling back and names the variable', () => {
+    globalThis.__APP_CONFIG__ = { apiRoot: '' };
+
+    expect(() => resolveApiRoot()).toThrow(/REACT_APP_API_ROOT/);
+  });
+});
