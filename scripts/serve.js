@@ -5,8 +5,55 @@ const path = require('path');
 const port = Number(process.env.PORT) || 4100;
 const buildDir = path.resolve(__dirname, '..', 'build');
 const indexFile = path.join(buildDir, 'index.html');
-const apiRoot = process.env.REACT_APP_API_ROOT;
-const hasApiRoot = () => apiRoot !== undefined && apiRoot.trim() !== '';
+
+const VARIABLE = 'REACT_APP_API_ROOT';
+
+const fail = reason => {
+  throw new Error(`${VARIABLE} ${reason}`);
+};
+
+const validateApiRoot = raw => {
+  if (typeof raw !== 'string' || raw.trim() === '') {
+    fail('is not set. Set it to the absolute http(s) URL of the API, for example http://localhost:3000/api.');
+  }
+
+  const value = raw.trim();
+
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch (error) {
+    fail('must be an absolute http or https URL.');
+  }
+
+  if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+    fail(`must use the http or https protocol, but uses "${parsed.protocol}".`);
+  }
+
+  const authorityStart = value.indexOf('//');
+  const authority = authorityStart === -1
+    ? ''
+    : value.slice(authorityStart + 2).split(/[/?#]/)[0];
+
+  if (parsed.username || parsed.password || authority.indexOf('@') !== -1) {
+    fail('must not contain embedded credentials (user:pass@). The value is public and must not carry a secret.');
+  }
+
+  if (parsed.search || parsed.hash || value.indexOf('?') !== -1 || value.indexOf('#') !== -1) {
+    fail('must not contain a query string or fragment. The value is public and must not carry a token.');
+  }
+
+  return value.replace(/\/$/, '');
+};
+
+let resolvedApiRoot;
+
+const getApiRoot = () => {
+  if (resolvedApiRoot === undefined) {
+    resolvedApiRoot = validateApiRoot(process.env.REACT_APP_API_ROOT);
+  }
+  return resolvedApiRoot;
+};
 
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -32,10 +79,7 @@ const escapeJsonForScript = value =>
     .replace(/&/g, '\\u0026');
 
 const injectRuntimeConfig = html => {
-  if (!hasApiRoot()) {
-    return html;
-  }
-
+  const apiRoot = getApiRoot();
   const script = `<script>window.__APP_CONFIG__ = {"apiRoot": ${escapeJsonForScript(apiRoot)}};</script>`;
   const headEnd = html.search(/<\/head\s*>/i);
 
@@ -109,10 +153,10 @@ const server = http.createServer((req, res) => {
 });
 
 const start = () => {
-  if (!hasApiRoot()) {
-    console.error(
-      'REACT_APP_API_ROOT is not set. Set it to the absolute http(s) URL of the API, for example http://localhost:3000/api.'
-    );
+  try {
+    getApiRoot();
+  } catch (error) {
+    console.error(error.message);
     process.exit(1);
   }
 
@@ -130,4 +174,4 @@ if (require.main === module) {
   start();
 }
 
-module.exports = { injectRuntimeConfig, server, start };
+module.exports = { injectRuntimeConfig, server, start, validateApiRoot };
