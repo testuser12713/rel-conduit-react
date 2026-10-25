@@ -12,7 +12,7 @@
       "build": [
         ["npm", "run", "build"]
       ],
-      "start": ["npm", "start", "--", "--port", "${PORT}"],
+      "start": ["node", "scripts/serve.js"],
       "port": 4100,
       "port_env": "PORT",
       "ready_timeout_s": 60,

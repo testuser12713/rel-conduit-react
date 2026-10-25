@@ -5,6 +5,7 @@ const path = require('path');
 const port = Number(process.env.PORT) || 4100;
 const buildDir = path.resolve(__dirname, '..', 'build');
 const indexFile = path.join(buildDir, 'index.html');
+const apiRoot = process.env.REACT_APP_API_ROOT;
 
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -23,6 +24,27 @@ const contentTypes = {
 const contentTypeFor = filePath =>
   contentTypes[path.extname(filePath).toLowerCase()] || 'application/octet-stream';
 
+const escapeJsonForScript = value =>
+  JSON.stringify(String(value))
+    .replace(/</g, '\\u003c')
+    .replace(/>/g, '\\u003e')
+    .replace(/&/g, '\\u0026');
+
+const injectRuntimeConfig = html => {
+  if (apiRoot === undefined) {
+    return html;
+  }
+
+  const script = `<script>window.__APP_CONFIG__ = {"apiRoot": ${escapeJsonForScript(apiRoot)}};</script>`;
+  const headEnd = html.search(/<\/head\s*>/i);
+
+  if (headEnd === -1) {
+    return `${script}${html}`;
+  }
+
+  return `${html.slice(0, headEnd)}${script}${html.slice(headEnd)}`;
+};
+
 const sendFile = (req, res, filePath, statusCode) => {
   fs.readFile(filePath, (error, data) => {
     if (error) {
@@ -31,13 +53,18 @@ const sendFile = (req, res, filePath, statusCode) => {
       return;
     }
 
+    const isIndex = path.resolve(filePath) === indexFile;
+    const body = isIndex
+      ? Buffer.from(injectRuntimeConfig(data.toString('utf8')), 'utf8')
+      : data;
+
     res.writeHead(statusCode, {
       'Content-Type': contentTypeFor(filePath),
       'Cache-Control': statusCode === 200 && path.extname(filePath) === '.html'
         ? 'no-cache'
         : 'public, max-age=31536000'
     });
-    res.end(req.method === 'HEAD' ? undefined : data);
+    res.end(req.method === 'HEAD' ? undefined : body);
   });
 };
 
@@ -80,11 +107,19 @@ const server = http.createServer((req, res) => {
   });
 });
 
-if (!fs.existsSync(indexFile)) {
-  console.error(`No production build found at ${buildDir}. Run "npm run build" first.`);
-  process.exit(1);
+const start = () => {
+  if (!fs.existsSync(indexFile)) {
+    console.error(`No production build found at ${buildDir}. Run "npm run build" first.`);
+    process.exit(1);
+  }
+
+  server.listen(port, () => {
+    console.log(`Serving ${buildDir} on http://localhost:${port}`);
+  });
+};
+
+if (require.main === module) {
+  start();
 }
 
-server.listen(port, () => {
-  console.log(`Serving ${buildDir} on http://localhost:${port}`);
-});
+module.exports = { injectRuntimeConfig, server, start };

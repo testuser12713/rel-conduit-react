@@ -39,14 +39,32 @@ const validate = raw => {
 };
 
 let resolvedDefault = null;
+let resolvedSource;
 
-export function resolveApiRoot(env) {
-  if (env === undefined) {
-    if (resolvedDefault === null) {
-      resolvedDefault = validate(process.env.REACT_APP_API_ROOT);
-    }
-    return resolvedDefault;
+const runtimeApiRoot = () => {
+  const runtimeConfig = typeof globalThis === 'undefined' ? undefined : globalThis.__APP_CONFIG__;
+  return runtimeConfig ? runtimeConfig.apiRoot : undefined;
+};
+
+const cacheDefault = source => {
+  if (resolvedDefault === null || resolvedSource !== source) {
+    resolvedDefault = validate(source);
+    resolvedSource = source;
   }
 
-  return validate(env.REACT_APP_API_ROOT);
+  return resolvedDefault;
+};
+
+export function resolveApiRoot(env) {
+  const runtime = runtimeApiRoot();
+
+  if (runtime !== undefined) {
+    return cacheDefault(runtime);
+  }
+
+  if (env !== undefined) {
+    return validate(env.REACT_APP_API_ROOT);
+  }
+
+  return cacheDefault(process.env.REACT_APP_API_ROOT);
 }
