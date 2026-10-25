@@ -12,10 +12,15 @@ import {
   PROFILE_FAVORITES_PAGE_UNLOADED
 } from '../constants/actionTypes';
 
+const errorsOf = action => (action.payload && action.payload.errors) || null;
+
 export default (state = {}, action) => {
   switch (action.type) {
     case ARTICLE_FAVORITED:
     case ARTICLE_UNFAVORITED:
+      if (action.error) {
+        return { ...state, errors: errorsOf(action) };
+      }
       return {
         ...state,
         articles: state.articles.map(article => {
@@ -30,15 +35,23 @@ export default (state = {}, action) => {
         })
       };
     case SET_PAGE:
+      if (action.error) {
+        return { ...state, errors: errorsOf(action) };
+      }
       return {
         ...state,
+        errors: null,
         articles: action.payload.articles,
         articlesCount: action.payload.articlesCount,
         currentPage: action.page
       };
     case APPLY_TAG_FILTER:
+      if (action.error) {
+        return { ...state, errors: errorsOf(action) };
+      }
       return {
         ...state,
+        errors: null,
         pager: action.pager,
         articles: action.payload.articles,
         articlesCount: action.payload.articlesCount,
@@ -47,8 +60,12 @@ export default (state = {}, action) => {
         currentPage: 0
       };
     case HOME_PAGE_LOADED:
+      if (action.error) {
+        return { ...state, errors: errorsOf(action) };
+      }
       return {
         ...state,
+        errors: null,
         pager: action.pager,
         tags: action.payload[0].tags,
         articles: action.payload[1].articles,
@@ -59,8 +76,12 @@ export default (state = {}, action) => {
     case HOME_PAGE_UNLOADED:
       return {};
     case CHANGE_TAB:
+      if (action.error) {
+        return { ...state, errors: errorsOf(action) };
+      }
       return {
         ...state,
+        errors: null,
         pager: action.pager,
         articles: action.payload.articles,
         articlesCount: action.payload.articlesCount,
