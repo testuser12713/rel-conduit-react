@@ -6,6 +6,7 @@ import { ConnectedRouter } from 'react-router-redux';
 import { store, history } from './store';
 import App from './components/App';
 import { resolveApiRoot } from './config';
+import './styles/main.css';
 
 const rootElement = document.getElementById('root');
 
