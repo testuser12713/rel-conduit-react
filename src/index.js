@@ -1,20 +1,50 @@
 import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
 import React from 'react';
-import { store, history} from './store';
+import { resolveApiRoot } from './config';
 
-import { Route, Switch } from 'react-router-dom';
-import { ConnectedRouter } from 'react-router-redux';
+const rootElement = document.getElementById('root');
 
-import App from './components/App';
+const renderStartupError = error => {
+  const container = document.createElement('div');
+  container.setAttribute('role', 'alert');
 
-ReactDOM.render((
-  <Provider store={store}>
-    <ConnectedRouter history={history}>
-      <Switch>
-        <Route path="/" component={App} />
-      </Switch>
-    </ConnectedRouter>
-  </Provider>
+  const heading = document.createElement('h1');
+  heading.textContent = 'Configuration error';
 
-), document.getElementById('root'));
+  const message = document.createElement('p');
+  message.textContent = (error && error.message) ||
+    'REACT_APP_API_ROOT is missing or invalid. Set it to the absolute http(s) URL of the API.';
+
+  container.appendChild(heading);
+  container.appendChild(message);
+
+  rootElement.textContent = '';
+  rootElement.appendChild(container);
+};
+
+const renderApp = () => {
+  const { Provider } = require('react-redux');
+  const { Route, Switch } = require('react-router-dom');
+  const { ConnectedRouter } = require('react-router-redux');
+
+  const { store, history } = require('./store');
+  const App = require('./components/App').default;
+
+  ReactDOM.render((
+    <Provider store={store}>
+      <ConnectedRouter history={history}>
+        <Switch>
+          <Route path="/" component={App} />
+        </Switch>
+      </ConnectedRouter>
+    </Provider>
+
+  ), rootElement);
+};
+
+try {
+  resolveApiRoot();
+  renderApp();
+} catch (error) {
+  renderStartupError(error);
+}

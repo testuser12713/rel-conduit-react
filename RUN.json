@@ -1,0 +1,33 @@
+{
+  "runcontract": 1,
+  "services": [
+    {
+      "name": "web",
+      "dir": ".",
+      "stack": "web-vite",
+      "kind": "server",
+      "install": [
+        ["npm", "install", "--no-audit", "--no-fund"]
+      ],
+      "build": [
+        ["npx", "cross-env", "REACT_APP_API_ROOT=${service:api.origin}/api", "react-scripts", "build"]
+      ],
+      "start": ["npx", "cross-env", "PORT=4100", "react-scripts", "start"],
+      "port": 4100,
+      "port_env": "PORT",
+      "ready_timeout_s": 60,
+      "health": {
+        "path": "/",
+        "expect_status": [200]
+      },
+      "env": {
+        "REACT_APP_API_ROOT": {
+          "dev": "${service:api.origin}/api"
+        }
+      },
+      "test": [
+        ["npx", "cross-env", "CI=true", "npm", "test", "--", "--watchAll=false"]
+      ]
+    }
+  ]
+}
