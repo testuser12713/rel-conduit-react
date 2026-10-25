@@ -1,5 +1,7 @@
 const VARIABLE = 'REACT_APP_API_ROOT';
 
+const API_PORT = 3000;
+
 const fail = reason => {
   throw new Error(`${VARIABLE} ${reason}`);
 };
@@ -46,6 +48,17 @@ const runtimeApiRoot = () => {
   return runtimeConfig ? runtimeConfig.apiRoot : undefined;
 };
 
+const derivedApiRoot = () => {
+  const location = typeof globalThis === 'undefined' ? undefined : globalThis.location;
+
+  if (!location || !location.hostname) {
+    return undefined;
+  }
+
+  const protocol = location.protocol === 'https:' ? 'https:' : 'http:';
+  return `${protocol}//${location.hostname}:${API_PORT}/api`;
+};
+
 const cacheDefault = source => {
   if (resolvedDefault === null || resolvedSource !== source) {
     resolvedDefault = validate(source);
@@ -66,5 +79,15 @@ export function resolveApiRoot(env) {
     return validate(env.REACT_APP_API_ROOT);
   }
 
-  return cacheDefault(process.env.REACT_APP_API_ROOT);
+  const baked = process.env.REACT_APP_API_ROOT;
+
+  if (typeof baked !== 'string' || baked.trim() === '') {
+    const derived = derivedApiRoot();
+
+    if (derived !== undefined) {
+      return cacheDefault(derived);
+    }
+  }
+
+  return cacheDefault(baked);
 }

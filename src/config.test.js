@@ -90,3 +90,20 @@ describe('resolveApiRoot at start time', () => {
     expect(() => resolveApiRoot(withRoot('https://baked.example.test/api'))).toThrow(/REACT_APP_API_ROOT/);
   });
 });
+
+describe('resolveApiRoot with no supplied value', () => {
+  afterEach(() => {
+    delete globalThis.__APP_CONFIG__;
+  });
+
+  it('derives the api origin on the serving host at the declared api port with the /api path', () => {
+    const location = globalThis.location;
+    const expected = `${location.protocol}//${location.hostname}:3000/api`;
+
+    expect(resolveApiRoot()).toBe(expected);
+  });
+
+  it('never derives a third-party origin', () => {
+    expect(resolveApiRoot()).not.toMatch(/realworld|productionready/i);
+  });
+});
