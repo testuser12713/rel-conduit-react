@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import agent from '../agent';
 import { connect } from 'react-redux';
 import { ARTICLE_FAVORITED, ARTICLE_UNFAVORITED } from '../constants/actionTypes';
+import { formatReadingTime } from '../utils/readingTime';
 
 const FAVORITED_CLASS = 'btn btn-sm btn-primary';
 const NOT_FAVORITED_CLASS = 'btn btn-sm btn-outline-primary';
@@ -20,6 +21,7 @@ const mapDispatchToProps = dispatch => ({
 
 const ArticlePreview = props => {
   const article = props.article;
+  const readingTime = formatReadingTime(article.readingTime);
   const favoriteButtonClass = article.favorited ?
     FAVORITED_CLASS :
     NOT_FAVORITED_CLASS;
@@ -47,6 +49,12 @@ const ArticlePreview = props => {
           <span className="date">
             {new Date(article.createdAt).toDateString()}
           </span>
+          {readingTime && (
+            <span className="date">
+              {' · '}
+              {readingTime}
+            </span>
+          )}
         </div>
 
         <div className="pull-xs-right">

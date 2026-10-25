@@ -3,7 +3,7 @@ import CommentContainer from './CommentContainer';
 import React from 'react';
 import agent from '../../agent';
 import { connect } from 'react-redux';
-import marked from 'marked';
+import { marked } from 'marked';
 import { ARTICLE_PAGE_LOADED, ARTICLE_PAGE_UNLOADED } from '../../constants/actionTypes';
 
 const mapStateToProps = state => ({
@@ -35,7 +35,7 @@ class Article extends React.Component {
       return null;
     }
 
-    const markup = { __html: marked(this.props.article.body, { sanitize: true }) };
+    const markup = { __html: marked.parse(this.props.article.body, { sanitize: true }) };
     const canModify = this.props.currentUser &&
       this.props.currentUser.username === this.props.article.author.username;
     return (

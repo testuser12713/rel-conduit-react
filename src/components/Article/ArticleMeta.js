@@ -1,9 +1,11 @@
 import ArticleActions from './ArticleActions';
 import { Link } from 'react-router-dom';
 import React from 'react';
+import { formatReadingTime } from '../../utils/readingTime';
 
 const ArticleMeta = props => {
   const article = props.article;
+  const readingTime = formatReadingTime(article.readingTime);
   return (
     <div className="article-meta">
       <Link to={`/@${article.author.username}`}>
@@ -17,6 +19,12 @@ const ArticleMeta = props => {
         <span className="date">
           {new Date(article.createdAt).toDateString()}
         </span>
+        {readingTime && (
+          <span className="date">
+            {' · '}
+            {readingTime}
+          </span>
+        )}
       </div>
 
       <ArticleActions canModify={props.canModify} article={article} />
