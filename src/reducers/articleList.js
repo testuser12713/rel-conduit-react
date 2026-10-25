@@ -9,8 +9,18 @@ import {
   PROFILE_PAGE_LOADED,
   PROFILE_PAGE_UNLOADED,
   PROFILE_FAVORITES_PAGE_LOADED,
-  PROFILE_FAVORITES_PAGE_UNLOADED
+  PROFILE_FAVORITES_PAGE_UNLOADED,
+  ASYNC_START
 } from '../constants/actionTypes';
+
+const LIST_ACTIONS = [
+  SET_PAGE,
+  APPLY_TAG_FILTER,
+  HOME_PAGE_LOADED,
+  CHANGE_TAB,
+  PROFILE_PAGE_LOADED,
+  PROFILE_FAVORITES_PAGE_LOADED
+];
 
 const errorsOf = action => (action.payload && action.payload.errors) || null;
 
@@ -34,24 +44,31 @@ export default (state = {}, action) => {
           return article;
         })
       };
+    case ASYNC_START:
+      if (LIST_ACTIONS.indexOf(action.subtype) !== -1) {
+        return { ...state, errors: null, loading: true };
+      }
+      return state;
     case SET_PAGE:
       if (action.error) {
-        return { ...state, errors: errorsOf(action) };
+        return { ...state, errors: errorsOf(action), loading: false };
       }
       return {
         ...state,
         errors: null,
+        loading: false,
         articles: action.payload.articles,
         articlesCount: action.payload.articlesCount,
         currentPage: action.page
       };
     case APPLY_TAG_FILTER:
       if (action.error) {
-        return { ...state, errors: errorsOf(action) };
+        return { ...state, errors: errorsOf(action), loading: false };
       }
       return {
         ...state,
         errors: null,
+        loading: false,
         pager: action.pager,
         articles: action.payload.articles,
         articlesCount: action.payload.articlesCount,
@@ -61,11 +78,12 @@ export default (state = {}, action) => {
       };
     case HOME_PAGE_LOADED:
       if (action.error) {
-        return { ...state, errors: errorsOf(action) };
+        return { ...state, errors: errorsOf(action), loading: false };
       }
       return {
         ...state,
         errors: null,
+        loading: false,
         pager: action.pager,
         tags: action.payload[0].tags,
         articles: action.payload[1].articles,
@@ -77,11 +95,12 @@ export default (state = {}, action) => {
       return {};
     case CHANGE_TAB:
       if (action.error) {
-        return { ...state, errors: errorsOf(action) };
+        return { ...state, errors: errorsOf(action), loading: false };
       }
       return {
         ...state,
         errors: null,
+        loading: false,
         pager: action.pager,
         articles: action.payload.articles,
         articlesCount: action.payload.articlesCount,
@@ -91,8 +110,13 @@ export default (state = {}, action) => {
       };
     case PROFILE_PAGE_LOADED:
     case PROFILE_FAVORITES_PAGE_LOADED:
+      if (action.error) {
+        return { ...state, errors: errorsOf(action), loading: false };
+      }
       return {
         ...state,
+        errors: null,
+        loading: false,
         pager: action.pager,
         articles: action.payload[1].articles,
         articlesCount: action.payload[1].articlesCount,

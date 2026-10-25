@@ -58,6 +58,7 @@ const TagFilterTab = props => {
 const mapStateToProps = state => ({
   ...state.articleList,
   tags: state.home.tags,
+  homeErrors: state.home.errors,
   token: state.common.token
 });
 
@@ -110,7 +111,7 @@ const MainView = props => {
       <ArticleList
         pager={props.pager}
         articles={props.articles}
-        errors={props.errors}
+        errors={props.errors || props.homeErrors}
         onRetry={retry}
         loading={props.loading}
         articlesCount={props.articlesCount}
