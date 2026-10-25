@@ -10,11 +10,12 @@
         ["npm", "install", "--no-audit", "--no-fund"]
       ],
       "build": [
-        ["npm", "run", "build"]
+        ["npx", "cross-env", "REACT_APP_API_ROOT=${service:api.origin}/api", "react-scripts", "build"]
       ],
-      "start": ["node", "scripts/serve.js"],
+      "start": ["npx", "cross-env", "PORT=4100", "react-scripts", "start"],
       "port": 4100,
       "port_env": "PORT",
+      "ready_timeout_s": 60,
       "health": {
         "path": "/",
         "expect_status": [200]
