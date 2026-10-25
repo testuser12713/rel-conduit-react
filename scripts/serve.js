@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const port = Number(process.env.PORT) || 4100;
-const buildDir = path.resolve(__dirname, '..', 'build');
+const buildDir = path.resolve(__dirname, '..', 'dist');
 const indexFile = path.join(buildDir, 'index.html');
 
 const VARIABLE = 'REACT_APP_API_ROOT';
