@@ -1,5 +1,10 @@
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { Provider } from 'react-redux';
+import { Route, Switch } from 'react-router-dom';
+import { ConnectedRouter } from 'react-router-redux';
+import { store, history } from './store';
+import App from './components/App';
 import { resolveApiRoot } from './config';
 
 const rootElement = document.getElementById('root');
@@ -23,13 +28,6 @@ const renderStartupError = error => {
 };
 
 const renderApp = () => {
-  const { Provider } = require('react-redux');
-  const { Route, Switch } = require('react-router-dom');
-  const { ConnectedRouter } = require('react-router-redux');
-
-  const { store, history } = require('./store');
-  const App = require('./components/App').default;
-
   ReactDOM.render((
     <Provider store={store}>
       <ConnectedRouter history={history}>
