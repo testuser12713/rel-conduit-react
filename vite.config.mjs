@@ -1,5 +1,7 @@
 import { transformWithOxc } from 'vite';
 
+const apiRoot = process.env.REACT_APP_API_ROOT;
+
 const jsxInJs = () => ({
   name: 'conduit-jsx-in-js',
   enforce: 'pre',
@@ -17,11 +19,15 @@ const jsxInJs = () => ({
 
 export default {
   plugins: [jsxInJs()],
+  define: {
+    'process.env.REACT_APP_API_ROOT': JSON.stringify(apiRoot === undefined ? '' : apiRoot)
+  },
   server: {
     port: 4100
   },
   test: {
     environment: 'jsdom',
+    globals: true,
     include: ['src/**/*.test.js']
   }
 };

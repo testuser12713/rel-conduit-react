@@ -10,9 +10,9 @@
         ["npm", "install", "--no-audit", "--no-fund"]
       ],
       "build": [
-        ["npx", "cross-env", "REACT_APP_API_ROOT=${service:api.origin}/api", "react-scripts", "build"]
+        ["npm", "run", "build"]
       ],
-      "start": ["npx", "cross-env", "PORT=4100", "react-scripts", "start"],
+      "start": ["npm", "start", "--", "--port", "${PORT}"],
       "port": 4100,
       "port_env": "PORT",
       "ready_timeout_s": 60,
@@ -26,7 +26,7 @@
         }
       },
       "test": [
-        ["npx", "cross-env", "CI=true", "npm", "test", "--", "--watchAll=false"]
+        ["npm", "test"]
       ]
     }
   ]
