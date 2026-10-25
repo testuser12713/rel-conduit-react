@@ -77,4 +77,16 @@ describe('resolveApiRoot at start time', () => {
 
     expect(() => resolveApiRoot()).toThrow(/REACT_APP_API_ROOT/);
   });
+
+  it('rejects an invalid runtime value instead of using the baked one', () => {
+    globalThis.__APP_CONFIG__ = { apiRoot: '/api' };
+
+    expect(() => resolveApiRoot(withRoot('https://baked.example.test/api'))).toThrow(/REACT_APP_API_ROOT/);
+  });
+
+  it('rejects an empty runtime value instead of using the baked one', () => {
+    globalThis.__APP_CONFIG__ = { apiRoot: '' };
+
+    expect(() => resolveApiRoot(withRoot('https://baked.example.test/api'))).toThrow(/REACT_APP_API_ROOT/);
+  });
 });

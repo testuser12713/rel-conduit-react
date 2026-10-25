@@ -6,6 +6,7 @@ const port = Number(process.env.PORT) || 4100;
 const buildDir = path.resolve(__dirname, '..', 'build');
 const indexFile = path.join(buildDir, 'index.html');
 const apiRoot = process.env.REACT_APP_API_ROOT;
+const hasApiRoot = () => apiRoot !== undefined && apiRoot.trim() !== '';
 
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -31,7 +32,7 @@ const escapeJsonForScript = value =>
     .replace(/&/g, '\\u0026');
 
 const injectRuntimeConfig = html => {
-  if (apiRoot === undefined) {
+  if (!hasApiRoot()) {
     return html;
   }
 
@@ -108,6 +109,13 @@ const server = http.createServer((req, res) => {
 });
 
 const start = () => {
+  if (!hasApiRoot()) {
+    console.error(
+      'REACT_APP_API_ROOT is not set. Set it to the absolute http(s) URL of the API, for example http://localhost:3000/api.'
+    );
+    process.exit(1);
+  }
+
   if (!fs.existsSync(indexFile)) {
     console.error(`No production build found at ${buildDir}. Run "npm run build" first.`);
     process.exit(1);

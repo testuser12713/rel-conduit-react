@@ -2,6 +2,18 @@ import { transformWithOxc } from 'vite';
 
 const apiRoot = process.env.REACT_APP_API_ROOT;
 
+const warnMissingApiRoot = () => ({
+  name: 'conduit-warn-missing-api-root',
+  apply: 'build',
+  buildStart() {
+    if (apiRoot === undefined || apiRoot.trim() === '') {
+      this.warn(
+        'REACT_APP_API_ROOT is not set at build time. The served app must provide it at runtime through window.__APP_CONFIG__; scripts/serve.js refuses to start without it.'
+      );
+    }
+  }
+});
+
 const jsxInJs = () => ({
   name: 'conduit-jsx-in-js',
   enforce: 'pre',
@@ -18,7 +30,7 @@ const jsxInJs = () => ({
 });
 
 export default {
-  plugins: [jsxInJs()],
+  plugins: [warnMissingApiRoot(), jsxInJs()],
   define: {
     global: 'globalThis',
     'process.env.REACT_APP_API_ROOT': JSON.stringify(apiRoot === undefined ? '' : apiRoot)
